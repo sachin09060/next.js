@@ -1,6 +1,5 @@
-// pages/api/registration.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { query, User } from "../../lib/db"; // Import the User type from lib/db.ts
+import { query, User } from "../../lib/db";
 
 interface RegistrationData {
   name: string;
@@ -12,7 +11,7 @@ interface RegistrationData {
 
 interface ApiResponse {
   message?: string;
-  user?: User; // Use the User type here for a single user response
+  user?: User;
   error?: string;
 }
 
