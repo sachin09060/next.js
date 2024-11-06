@@ -3,17 +3,60 @@
 import { useState } from "react";
 import { lusitana } from "./ui/fonts";
 
-const Home = () => {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+interface RegistrationFormData {
+  name: string;
+  age: string;
+  gender: string;
+  address: string;
+  phone: string;
+}
 
-  const addRegistration = () => {
-    alert(
-      `Name: ${name}\nAge: ${age}\nGender: ${gender}\nAddress: ${address}\nPhone: ${phone}`
-    );
+const Home = () => {
+  const [formData, setFormData] = useState<RegistrationFormData>({
+    name: "",
+    age: "",
+    gender: "",
+    address: "",
+    phone: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const addRegistration = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/registration", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("User registered successfully!");
+      } else {
+        setError(data.error || "Something went wrong.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to register user");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,16 +64,18 @@ const Home = () => {
       <div className={`text-4xl font-semibold mb-8 ${lusitana.className}`}>
         User Registration Form!
       </div>
+
+      {error && <div className="text-red-500 mt-4">{error}</div>}
+
       <div className="flex space-x-6">
         <div>Name :</div>
         <div className="border border-gray-400 rounded-sm">
           <input
             type="text"
             className="w-96"
-            value={name}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setName(e.target.value)
-            }
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
           />
         </div>
       </div>
@@ -40,10 +85,9 @@ const Home = () => {
           <input
             type="text"
             className="w-96"
-            value={age}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setAge(e.target.value)
-            }
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
           />
         </div>
       </div>
@@ -53,10 +97,9 @@ const Home = () => {
           <input
             type="text"
             className="w-96"
-            value={gender}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setGender(e.target.value)
-            }
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
           />
         </div>
       </div>
@@ -66,10 +109,9 @@ const Home = () => {
           <input
             type="text"
             className="w-96"
-            value={address}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setAddress(e.target.value)
-            }
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
           />
         </div>
       </div>
@@ -79,19 +121,20 @@ const Home = () => {
           <input
             type="text"
             className="w-96"
-            value={phone}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPhone(e.target.value)
-            }
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
           />
         </div>
       </div>
+
       <div className="flex space-x-2">
         <button
           onClick={addRegistration}
           className="bg-blue-900 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+          disabled={loading}
         >
-          Save
+          {loading ? "Saving..." : "Save"}
         </button>
         <button className="bg-white text-blue-900 px-4 py-2 rounded-md border-2 border-blue-900">
           Cancel
